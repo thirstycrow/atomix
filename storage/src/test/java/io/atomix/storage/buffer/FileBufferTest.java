@@ -21,6 +21,7 @@ import org.junit.Test;
 import java.io.File;
 import java.nio.file.Files;
 
+import static io.atomix.storage.buffer.FileBytes.PAGE_SIZE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -91,4 +92,15 @@ public class FileBufferTest extends BufferTest {
     assertFalse(Files.exists(file.toPath()));
   }
 
+  @Test
+  public void testWriteLargeFile() {
+    File file = FileTesting.createFile();
+    byte[] blankPage = new byte[PAGE_SIZE];
+    long totalBytes = (long) (3.276 * (1L << 30));
+    try (FileBuffer buffer = FileBuffer.allocate(file, 64)) {
+      for (long i = 0; i < totalBytes; i += PAGE_SIZE) {
+        buffer.write(blankPage, 0, Math.min(totalBytes - i, PAGE_SIZE));
+      }
+    }
+  }
 }

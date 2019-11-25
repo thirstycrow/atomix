@@ -30,8 +30,8 @@ public class HeapBuffer extends ByteBufferBuffer {
    * Allocates a direct buffer with an initial capacity of {@code 4096} and a maximum capacity of {@link Long#MAX_VALUE}.
    *
    * @return The direct buffer.
-   * @see HeapBuffer#allocate(int)
-   * @see HeapBuffer#allocate(int, int)
+   * @see HeapBuffer#allocate(long)
+   * @see HeapBuffer#allocate(long, long)
    */
   public static HeapBuffer allocate() {
     return allocate(DEFAULT_INITIAL_CAPACITY, MAX_SIZE);
@@ -43,11 +43,11 @@ public class HeapBuffer extends ByteBufferBuffer {
    * @param initialCapacity The initial capacity of the buffer to allocate (in bytes).
    * @return The direct buffer.
    * @throws IllegalArgumentException If {@code capacity} is greater than the maximum allowed count for
-   *                                  a {@link java.nio.ByteBuffer} - {@code Integer.MAX_VALUE - 5}
+   *                                  a {@link java.nio.ByteBuffer} - {@code Long.MAX_VALUE - 5}
    * @see HeapBuffer#allocate()
-   * @see HeapBuffer#allocate(int, int)
+   * @see HeapBuffer#allocate(long, long)
    */
-  public static HeapBuffer allocate(int initialCapacity) {
+  public static HeapBuffer allocate(long initialCapacity) {
     return allocate(initialCapacity, MAX_SIZE);
   }
 
@@ -58,13 +58,13 @@ public class HeapBuffer extends ByteBufferBuffer {
    * @param maxCapacity     The maximum capacity of the buffer.
    * @return The direct buffer.
    * @throws IllegalArgumentException If {@code capacity} or {@code maxCapacity} is greater than the maximum
-   *                                  allowed count for a {@link java.nio.ByteBuffer} - {@code Integer.MAX_VALUE - 5}
+   *                                  allowed count for a {@link java.nio.ByteBuffer} - {@code Long.MAX_VALUE - 5}
    * @see HeapBuffer#allocate()
-   * @see HeapBuffer#allocate(int)
+   * @see HeapBuffer#allocate(long)
    */
-  public static HeapBuffer allocate(int initialCapacity, int maxCapacity) {
+  public static HeapBuffer allocate(long initialCapacity, long maxCapacity) {
     checkArgument(initialCapacity <= maxCapacity, "initial capacity cannot be greater than maximum capacity");
-    return new HeapBuffer(HeapBytes.allocate((int) Math.min(Memory.Util.toPow2(initialCapacity), MAX_SIZE)), 0, initialCapacity, maxCapacity);
+    return new HeapBuffer(HeapBytes.allocate(Math.min(Memory.Util.toPow2(initialCapacity), MAX_SIZE)), 0, initialCapacity, maxCapacity);
   }
 
   /**
@@ -81,7 +81,7 @@ public class HeapBuffer extends ByteBufferBuffer {
 
   private final HeapBytes bytes;
 
-  protected HeapBuffer(HeapBytes bytes, int offset, int initialCapacity, int maxCapacity) {
+  protected HeapBuffer(HeapBytes bytes, long offset, long initialCapacity, long maxCapacity) {
     super(bytes, offset, initialCapacity, maxCapacity, null);
     this.bytes = bytes;
   }

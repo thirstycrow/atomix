@@ -51,7 +51,7 @@ public class FileBytes extends AbstractBytes {
    * @return The allocated buffer.
    */
   public static FileBytes allocate(File file) {
-    return allocate(file, DEFAULT_MODE, Integer.MAX_VALUE);
+    return allocate(file, DEFAULT_MODE, MAX_SIZE);
   }
 
   /**
@@ -63,7 +63,7 @@ public class FileBytes extends AbstractBytes {
    * @param size The count of the bytes to allocate.
    * @return The allocated buffer.
    */
-  public static FileBytes allocate(File file, int size) {
+  public static FileBytes allocate(File file, long size) {
     return allocate(file, DEFAULT_MODE, size);
   }
 
@@ -77,19 +77,19 @@ public class FileBytes extends AbstractBytes {
    * @param size The count of the bytes to allocate.
    * @return The allocated buffer.
    */
-  public static FileBytes allocate(File file, String mode, int size) {
-    return new FileBytes(file, mode, (int) Math.min(Memory.Util.toPow2(size), Integer.MAX_VALUE));
+  public static FileBytes allocate(File file, String mode, long size) {
+    return new FileBytes(file, mode, Math.min(Memory.Util.toPow2(size), MAX_SIZE));
   }
 
-  private static final int PAGE_SIZE = 1024 * 4;
+  public static final int PAGE_SIZE = 1024 * 4;
   private static final byte[] BLANK_PAGE = new byte[PAGE_SIZE];
 
   private final File file;
   private final String mode;
   private final RandomAccessFile randomAccessFile;
-  private int size;
+  private long size;
 
-  FileBytes(File file, String mode, int size) {
+  FileBytes(File file, String mode, long size) {
     if (file == null) {
       throw new NullPointerException("file cannot be null");
     }
@@ -132,16 +132,16 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public int size() {
+  public long size() {
     return size;
   }
 
   @Override
-  public Bytes resize(int newSize) {
+  public Bytes resize(long newSize) {
     if (newSize < size) {
       throw new IllegalArgumentException("cannot decrease file bytes size; use zero() to decrease file size");
     }
-    int oldSize = this.size;
+    long oldSize = this.size;
     this.size = newSize;
     try {
       long length = randomAccessFile.length();
@@ -170,7 +170,7 @@ public class FileBytes extends AbstractBytes {
    * @throws IllegalArgumentException If {@code count} is greater than the maximum allowed
    *                                  {@link java.nio.MappedByteBuffer} count: {@link Integer#MAX_VALUE}
    */
-  public MappedBytes map(int offset, int size) {
+  public MappedBytes map(long offset, long size) {
     return map(offset, size, parseMode(mode));
   }
 
@@ -184,12 +184,12 @@ public class FileBytes extends AbstractBytes {
    * @throws IllegalArgumentException If {@code count} is greater than the maximum allowed
    *                                  {@link java.nio.MappedByteBuffer} count: {@link Integer#MAX_VALUE}
    */
-  public MappedBytes map(int offset, int size, FileChannel.MapMode mode) {
+  public MappedBytes map(long offset, long size, FileChannel.MapMode mode) {
     MappedByteBuffer mappedByteBuffer = mapFile(randomAccessFile, offset, size, mode);
     return new MappedBytes(file, randomAccessFile, mappedByteBuffer, mode);
   }
 
-  private static MappedByteBuffer mapFile(RandomAccessFile randomAccessFile, int offset, int size, FileChannel.MapMode mode) {
+  private static MappedByteBuffer mapFile(RandomAccessFile randomAccessFile, long offset, long size, FileChannel.MapMode mode) {
     try {
       return randomAccessFile.getChannel().map(mode, offset, size);
     } catch (IOException e) {
@@ -215,7 +215,7 @@ public class FileBytes extends AbstractBytes {
   /**
    * Seeks to the given offset.
    */
-  private void seekToOffset(int offset) throws IOException {
+  private void seekToOffset(long offset) throws IOException {
     if (randomAccessFile.getFilePointer() != offset) {
       randomAccessFile.seek(offset);
     }
@@ -227,7 +227,7 @@ public class FileBytes extends AbstractBytes {
       randomAccessFile.setLength(0);
       randomAccessFile.setLength(size);
       for (int i = 0; i < size; i += PAGE_SIZE) {
-        randomAccessFile.write(BLANK_PAGE, 0, Math.min(size - i, PAGE_SIZE));
+        randomAccessFile.write(BLANK_PAGE, 0, (int) Math.min(size - i, PAGE_SIZE));
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -236,14 +236,14 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes zero(int offset) {
+  public Bytes zero(long offset) {
     try {
-      int length = Math.max(offset, size);
+      long length = Math.max(offset, size);
       randomAccessFile.setLength(offset);
       randomAccessFile.setLength(length);
       seekToOffset(offset);
-      for (int i = offset; i < length; i += PAGE_SIZE) {
-        randomAccessFile.write(BLANK_PAGE, 0, Math.min(length - i, PAGE_SIZE));
+      for (long i = offset; i < length; i += PAGE_SIZE) {
+        randomAccessFile.write(BLANK_PAGE, 0, (int) Math.min(length - i, PAGE_SIZE));
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
@@ -252,15 +252,15 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes zero(int offset, int length) {
-    for (int i = offset; i < offset + length; i++) {
+  public Bytes zero(long offset, long length) {
+    for (long i = offset; i < offset + length; i++) {
       writeByte(i, (byte) 0);
     }
     return this;
   }
 
   @Override
-  public Bytes read(int position, Bytes bytes, int offset, int length) {
+  public Bytes read(long position, Bytes bytes, long offset, long length) {
     checkRead(position, length);
     if (bytes instanceof WrappedBytes) {
       bytes = ((WrappedBytes) bytes).root();
@@ -286,7 +286,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes read(int position, byte[] bytes, int offset, int length) {
+  public Bytes read(long position, byte[] bytes, long offset, long length) {
     checkRead(position, length);
     try {
       seekToOffset(position);
@@ -298,7 +298,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public int readByte(int offset) {
+  public int readByte(long offset) {
     checkRead(offset, BYTE);
     try {
       seekToOffset(offset);
@@ -309,7 +309,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public char readChar(int offset) {
+  public char readChar(long offset) {
     checkRead(offset, CHARACTER);
     try {
       seekToOffset(offset);
@@ -320,7 +320,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public short readShort(int offset) {
+  public short readShort(long offset) {
     checkRead(offset, SHORT);
     try {
       seekToOffset(offset);
@@ -331,7 +331,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public int readInt(int offset) {
+  public int readInt(long offset) {
     checkRead(offset, INTEGER);
     try {
       seekToOffset(offset);
@@ -342,7 +342,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public long readLong(int offset) {
+  public long readLong(long offset) {
     checkRead(offset, LONG);
     try {
       seekToOffset(offset);
@@ -353,7 +353,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public float readFloat(int offset) {
+  public float readFloat(long offset) {
     checkRead(offset, FLOAT);
     try {
       seekToOffset(offset);
@@ -364,7 +364,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public double readDouble(int offset) {
+  public double readDouble(long offset) {
     checkRead(offset, DOUBLE);
     try {
       seekToOffset(offset);
@@ -375,7 +375,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes write(int position, Bytes bytes, int offset, int length) {
+  public Bytes write(long position, Bytes bytes, long offset, long length) {
     checkWrite(position, length);
     if (bytes instanceof WrappedBytes) {
       bytes = ((WrappedBytes) bytes).root();
@@ -401,7 +401,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes write(int position, byte[] bytes, int offset, int length) {
+  public Bytes write(long position, byte[] bytes, long offset, long length) {
     checkWrite(position, length);
     try {
       seekToOffset(position);
@@ -413,7 +413,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes writeByte(int offset, int b) {
+  public Bytes writeByte(long offset, int b) {
     checkWrite(offset, BYTE);
     try {
       seekToOffset(offset);
@@ -425,7 +425,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes writeChar(int offset, char c) {
+  public Bytes writeChar(long offset, char c) {
     checkWrite(offset, CHARACTER);
     try {
       seekToOffset(offset);
@@ -437,7 +437,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes writeShort(int offset, short s) {
+  public Bytes writeShort(long offset, short s) {
     checkWrite(offset, SHORT);
     try {
       seekToOffset(offset);
@@ -449,7 +449,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes writeInt(int offset, int i) {
+  public Bytes writeInt(long offset, int i) {
     checkWrite(offset, INTEGER);
     try {
       seekToOffset(offset);
@@ -461,7 +461,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes writeLong(int offset, long l) {
+  public Bytes writeLong(long offset, long l) {
     checkWrite(offset, LONG);
     try {
       seekToOffset(offset);
@@ -473,7 +473,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes writeFloat(int offset, float f) {
+  public Bytes writeFloat(long offset, float f) {
     checkWrite(offset, FLOAT);
     try {
       seekToOffset(offset);
@@ -485,7 +485,7 @@ public class FileBytes extends AbstractBytes {
   }
 
   @Override
-  public Bytes writeDouble(int offset, double d) {
+  public Bytes writeDouble(long offset, double d) {
     checkWrite(offset, DOUBLE);
     try {
       seekToOffset(offset);

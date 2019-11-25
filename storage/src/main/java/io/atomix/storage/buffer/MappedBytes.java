@@ -46,7 +46,7 @@ public class MappedBytes extends ByteBufferBytes {
    * @return The mapped buffer.
    * @throws NullPointerException     If {@code file} is {@code null}
    * @throws IllegalArgumentException If {@code count} is greater than {@link MappedBytes#MAX_SIZE}
-   * @see #allocate(File, FileChannel.MapMode, int)
+   * @see #allocate(File, FileChannel.MapMode, long)
    */
   public static MappedBytes allocate(File file, int size) {
     return allocate(file, FileChannel.MapMode.READ_WRITE, size);
@@ -66,7 +66,7 @@ public class MappedBytes extends ByteBufferBytes {
    * @throws IllegalArgumentException If {@code count} is greater than {@link Integer#MAX_VALUE}
    * @see #allocate(File, int)
    */
-  public static MappedBytes allocate(File file, FileChannel.MapMode mode, int size) {
+  public static MappedBytes allocate(File file, FileChannel.MapMode mode, long size) {
     return FileBytes.allocate(file, size).map(0, size, mode);
   }
 

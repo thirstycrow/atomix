@@ -52,7 +52,7 @@ public interface BufferOutput<T extends BufferOutput<?>> extends AutoCloseable {
    * @param length The number of bytes from the provided byte array to write to the buffer.
    * @return The written buffer.
    */
-  T write(Bytes bytes, int offset, int length);
+  T write(Bytes bytes, long offset, long length);
 
   /**
    * Writes an array of bytes to the buffer.
@@ -62,7 +62,7 @@ public interface BufferOutput<T extends BufferOutput<?>> extends AutoCloseable {
    * @param length The number of bytes from the provided byte array to write to the buffer.
    * @return The written buffer.
    */
-  T write(byte[] bytes, int offset, int length);
+  T write(byte[] bytes, long offset, long length);
 
   /**
    * Writes a buffer to the buffer.

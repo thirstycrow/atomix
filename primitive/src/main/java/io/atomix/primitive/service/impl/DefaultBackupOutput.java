@@ -54,13 +54,13 @@ public class DefaultBackupOutput implements BackupOutput {
   }
 
   @Override
-  public BackupOutput write(Bytes bytes, int offset, int length) {
+  public BackupOutput write(Bytes bytes, long offset, long length) {
     output.write(bytes, offset, length);
     return this;
   }
 
   @Override
-  public BackupOutput write(byte[] bytes, int offset, int length) {
+  public BackupOutput write(byte[] bytes, long offset, long length) {
     output.write(bytes, offset, length);
     return this;
   }

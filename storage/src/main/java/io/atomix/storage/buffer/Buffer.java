@@ -139,7 +139,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The buffer's offset.
    */
-  int offset();
+  long offset();
 
   /**
    * Returns the buffer's capacity.
@@ -149,21 +149,21 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The buffer's capacity.
    */
-  int capacity();
+  long capacity();
 
   /**
    * Sets the buffer's capacity.
    * <p>
    * The given capacity must be greater than the current {@link Buffer#capacity() capacity} and less than or equal to
    * {@link Buffer#maxCapacity()}. When the capacity is changed, the underlying {@link Bytes} will be resized via
-   * {@link Bytes#resize(int)}.
+   * {@link Bytes#resize(long)}.
    *
    * @param capacity The capacity to which to resize the buffer.
    * @return The resized buffer.
    * @throws IllegalArgumentException If the given {@code capacity} is less than the current {@code capacity}
    *                                  or greater than {@link Buffer#maxCapacity()}
    */
-  Buffer capacity(int capacity);
+  Buffer capacity(long capacity);
 
   /**
    * Returns the maximum allowed capacity for the buffer.
@@ -173,7 +173,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The buffer's maximum capacity.
    */
-  int maxCapacity();
+  long maxCapacity();
 
   /**
    * Sets the buffer's current read/write position.
@@ -184,7 +184,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @return This buffer.
    * @throws IllegalArgumentException If the given position is less than {@code 0} or more than {@link Buffer#limit()}
    */
-  Buffer position(int position);
+  Buffer position(long position);
 
   /**
    * Returns the buffer's read/write limit.
@@ -195,7 +195,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The buffer's limit.
    */
-  int limit();
+  long limit();
 
   /**
    * Sets the buffer's read/write limit.
@@ -207,7 +207,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @return This buffer.
    * @throws IllegalArgumentException If the given limit is less than {@code 0} or more than {@link Buffer#capacity()}
    */
-  Buffer limit(int limit);
+  Buffer limit(long limit);
 
   /**
    * Returns the number of bytes remaining in the buffer until the {@link Buffer#limit()} is reached.
@@ -218,7 +218,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @return The number of bytes remaining in the buffer.
    */
   @Override
-  int remaining();
+  long remaining();
 
   /**
    * Returns a boolean indicating whether the buffer has bytes remaining.
@@ -290,7 +290,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws IndexOutOfBoundsException If {@code length} is greater than {@link Buffer#remaining()}
    */
   @Override
-  Buffer skip(int length);
+  Buffer skip(long length);
 
   /**
    * Clears the buffer.
@@ -338,8 +338,8 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * always call {@link Buffer#close()} once finished using the buffer slice.
    *
    * @return A slice of this buffer.
-   * @see Buffer#slice(int)
-   * @see Buffer#slice(int, int)
+   * @see Buffer#slice(long)
+   * @see Buffer#slice(long, long)
    */
   Buffer slice();
 
@@ -358,9 +358,9 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param length The length of the slice.
    * @return A slice of this buffer.
    * @see Buffer#slice()
-   * @see Buffer#slice(int, int)
+   * @see Buffer#slice(long, long)
    */
-  Buffer slice(int length);
+  Buffer slice(long length);
 
   /**
    * Returns a view of this buffer starting at the given offset with the given length.
@@ -380,9 +380,9 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws IndexOutOfBoundsException         If the given offset is not contained within the bounds of this buffer
    * @throws java.nio.BufferUnderflowException If the length of the remaining bytes in the buffer is less than {@code length}
    * @see Buffer#slice()
-   * @see Buffer#slice(int)
+   * @see Buffer#slice(long)
    */
-  Buffer slice(int offset, int length);
+  Buffer slice(long offset, long length);
 
   /**
    * Reads bytes into the given buffer.
@@ -411,8 +411,8 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @return The buffer.
    * @throws java.nio.BufferUnderflowException If the given byte array's {@code length} is greater than
    *                                           {@link Buffer#remaining()}
-   * @see Buffer#read(Bytes, int, int)
-   * @see Buffer#read(int, Bytes, int, int)
+   * @see Buffer#read(Bytes, long, long)
+   * @see Buffer#read(long, Bytes, long, long)
    */
   @Override
   Buffer read(Bytes bytes);
@@ -429,8 +429,8 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @return The buffer.
    * @throws java.nio.BufferUnderflowException If the given byte array's {@code length} is greater than
    *                                           {@link Buffer#remaining()}
-   * @see Buffer#read(byte[], int, int)
-   * @see Buffer#read(int, byte[], int, int)
+   * @see Buffer#read(byte[], long, long)
+   * @see Buffer#read(long, byte[], long, long)
    */
   @Override
   Buffer read(byte[] bytes);
@@ -450,10 +450,10 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws IndexOutOfBoundsException         If the given offset is out of the bounds of the buffer. Note that
    *                                           bounds are determined by the buffer's {@link Buffer#limit()} rather than capacity.
    * @see Buffer#read(Bytes)
-   * @see Buffer#read(int, Bytes, int, int)
+   * @see Buffer#read(long, Bytes, long, long)
    */
   @Override
-  Buffer read(Bytes bytes, int dstOffset, int length);
+  Buffer read(Bytes bytes, long dstOffset, long length);
 
   /**
    * Reads bytes into the given byte array starting at the given offset up to the given length.
@@ -471,10 +471,10 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws IndexOutOfBoundsException         If the given offset is out of the bounds of the buffer. Note that
    *                                           bounds are determined by the buffer's {@link Buffer#limit()} rather than capacity.
    * @see Buffer#read(Bytes)
-   * @see Buffer#read(Bytes, int, int)
+   * @see Buffer#read(Bytes, long, long)
    */
   @Override
-  Buffer read(int srcOffset, Bytes bytes, int dstOffset, int length);
+  Buffer read(long srcOffset, Bytes bytes, long dstOffset, long length);
 
   /**
    * Reads bytes into the given byte array starting at current position up to the given length.
@@ -491,10 +491,10 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws IndexOutOfBoundsException         If the given offset is out of the bounds of the buffer. Note that
    *                                           bounds are determined by the buffer's {@link Buffer#limit()} rather than capacity.
    * @see Buffer#read(byte[])
-   * @see Buffer#read(int, byte[], int, int)
+   * @see Buffer#read(long, byte[], long, long)
    */
   @Override
-  Buffer read(byte[] bytes, int offset, int length);
+  Buffer read(byte[] bytes, long offset, long length);
 
   /**
    * Reads bytes into the given byte array starting at the given offset up to the given length.
@@ -512,10 +512,10 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws IndexOutOfBoundsException         If the given offset is out of the bounds of the buffer. Note that
    *                                           bounds are determined by the buffer's {@link Buffer#limit()} rather than capacity.
    * @see Buffer#read(byte[])
-   * @see Buffer#read(byte[], int, int)
+   * @see Buffer#read(byte[], long, long)
    */
   @Override
-  Buffer read(int srcOffset, byte[] bytes, int dstOffset, int length);
+  Buffer read(long srcOffset, byte[] bytes, long dstOffset, long length);
 
   /**
    * Reads a byte from the buffer at the current position.
@@ -525,7 +525,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read byte.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#BYTE}
-   * @see Buffer#readByte(int)
+   * @see Buffer#readByte(long)
    */
   @Override
   int readByte();
@@ -543,7 +543,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readByte()
    */
   @Override
-  int readByte(int offset);
+  int readByte(long offset);
 
   /**
    * Reads an unsigned byte from the buffer at the current position.
@@ -553,7 +553,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read byte.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#BYTE}
-   * @see Buffer#readUnsignedByte(int)
+   * @see Buffer#readUnsignedByte(long)
    */
   @Override
   int readUnsignedByte();
@@ -571,7 +571,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readUnsignedByte()
    */
   @Override
-  int readUnsignedByte(int offset);
+  int readUnsignedByte(long offset);
 
   /**
    * Reads a 16-bit character from the buffer at the current position.
@@ -582,7 +582,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read character.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#CHARACTER}
-   * @see Buffer#readChar(int)
+   * @see Buffer#readChar(long)
    */
   @Override
   char readChar();
@@ -600,7 +600,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readChar()
    */
   @Override
-  char readChar(int offset);
+  char readChar(long offset);
 
   /**
    * Reads a 16-bit signed integer from the buffer at the current position.
@@ -611,7 +611,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read short.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#SHORT}
-   * @see Buffer#readShort(int)
+   * @see Buffer#readShort(long)
    */
   @Override
   short readShort();
@@ -629,7 +629,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readShort()
    */
   @Override
-  short readShort(int offset);
+  short readShort(long offset);
 
   /**
    * Reads a 16-bit unsigned integer from the buffer at the current position.
@@ -640,7 +640,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read short.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#SHORT}
-   * @see Buffer#readUnsignedShort(int)
+   * @see Buffer#readUnsignedShort(long)
    */
   @Override
   int readUnsignedShort();
@@ -658,7 +658,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readUnsignedShort()
    */
   @Override
-  int readUnsignedShort(int offset);
+  int readUnsignedShort(long offset);
 
   /**
    * Reads a 32-bit signed integer from the buffer at the current position.
@@ -669,7 +669,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read integer.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#INTEGER}
-   * @see Buffer#readInt(int)
+   * @see Buffer#readInt(long)
    */
   @Override
   int readInt();
@@ -687,7 +687,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readInt()
    */
   @Override
-  int readInt(int offset);
+  int readInt(long offset);
 
   /**
    * Reads a 32-bit unsigned integer from the buffer at the current position.
@@ -698,7 +698,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read integer.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#INTEGER}
-   * @see Buffer#readUnsignedInt(int)
+   * @see Buffer#readUnsignedInt(long)
    */
   @Override
   long readUnsignedInt();
@@ -716,7 +716,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readUnsignedInt()
    */
   @Override
-  long readUnsignedInt(int offset);
+  long readUnsignedInt(long offset);
 
   /**
    * Reads a 64-bit signed integer from the buffer at the current position.
@@ -727,7 +727,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read long.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#LONG}
-   * @see Buffer#readLong(int)
+   * @see Buffer#readLong(long)
    */
   @Override
   long readLong();
@@ -745,7 +745,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readLong()
    */
   @Override
-  long readLong(int offset);
+  long readLong(long offset);
 
   /**
    * Reads a single-precision 32-bit floating point number from the buffer at the current position.
@@ -756,7 +756,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read float.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#FLOAT}
-   * @see Buffer#readFloat(int)
+   * @see Buffer#readFloat(long)
    */
   @Override
   float readFloat();
@@ -774,7 +774,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readFloat()
    */
   @Override
-  float readFloat(int offset);
+  float readFloat(long offset);
 
   /**
    * Reads a double-precision 64-bit floating point number from the buffer at the current position.
@@ -785,7 +785,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read double.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@link Bytes#DOUBLE}
-   * @see Buffer#readDouble(int)
+   * @see Buffer#readDouble(long)
    */
   @Override
   double readDouble();
@@ -803,7 +803,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readDouble()
    */
   @Override
-  double readDouble(int offset);
+  double readDouble(long offset);
 
   /**
    * Reads a 1 byte boolean from the buffer at the current position.
@@ -813,7 +813,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read boolean.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@code 1}
-   * @see Buffer#readBoolean(int)
+   * @see Buffer#readBoolean(long)
    */
   @Override
   boolean readBoolean();
@@ -831,7 +831,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readBoolean()
    */
   @Override
-  boolean readBoolean(int offset);
+  boolean readBoolean(long offset);
 
   /**
    * Reads a UTF-8 string from the buffer at the current position.
@@ -842,7 +842,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    *
    * @return The read string.
    * @throws java.nio.BufferUnderflowException If {@link Buffer#remaining()} is less than {@code 1}
-   * @see Buffer#readUTF8(int)
+   * @see Buffer#readUTF8(long)
    */
   @Override
   String readUTF8();
@@ -860,7 +860,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#readUTF8()
    */
   @Override
-  String readUTF8(int offset);
+  String readUTF8(long offset);
 
   /**
    * Writes a buffer to the buffer.
@@ -887,8 +887,8 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param bytes The array of bytes to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If the number of bytes exceeds the buffer's remaining bytes.
-   * @see Buffer#write(Bytes, int, int)
-   * @see Buffer#write(int, Bytes, int, int)
+   * @see Buffer#write(Bytes, long, long)
+   * @see Buffer#write(long, Bytes, long, long)
    */
   @Override
   Buffer write(Bytes bytes);
@@ -903,8 +903,8 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param bytes The array of bytes to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If the number of bytes exceeds the buffer's remaining bytes.
-   * @see Buffer#write(byte[], int, int)
-   * @see Buffer#write(int, byte[], int, int)
+   * @see Buffer#write(byte[], long, long)
+   * @see Buffer#write(long, byte[], long, long)
    */
   @Override
   Buffer write(byte[] bytes);
@@ -924,10 +924,10 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws java.nio.BufferOverflowException If there are not enough bytes remaining in the buffer.
    * @throws IndexOutOfBoundsException        If the given offset is out of the bounds of the buffer.
    * @see Buffer#write(Bytes)
-   * @see Buffer#write(int, Bytes, int, int)
+   * @see Buffer#write(long, Bytes, long, long)
    */
   @Override
-  Buffer write(Bytes bytes, int offset, int length);
+  Buffer write(Bytes bytes, long offset, long length);
 
   /**
    * Writes an array of bytes to the buffer.
@@ -945,10 +945,10 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws java.nio.BufferOverflowException If there are not enough bytes remaining in the buffer.
    * @throws IndexOutOfBoundsException        If the given offset is out of the bounds of the buffer.
    * @see Buffer#write(Bytes)
-   * @see Buffer#write(Bytes, int, int)
+   * @see Buffer#write(Bytes, long, long)
    */
   @Override
-  Buffer write(int offset, Bytes src, int srcOffset, int length);
+  Buffer write(long offset, Bytes src, long srcOffset, long length);
 
   /**
    * Writes an array of bytes to the buffer.
@@ -965,10 +965,10 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws java.nio.BufferOverflowException If there are not enough bytes remaining in the buffer.
    * @throws IndexOutOfBoundsException        If the given offset is out of the bounds of the buffer.
    * @see Buffer#write(byte[])
-   * @see Buffer#write(int, byte[], int, int)
+   * @see Buffer#write(long, byte[], long, long)
    */
   @Override
-  Buffer write(byte[] bytes, int offset, int length);
+  Buffer write(byte[] bytes, long offset, long length);
 
   /**
    * Writes an array of bytes to the buffer.
@@ -986,10 +986,10 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @throws java.nio.BufferOverflowException If there are not enough bytes remaining in the buffer.
    * @throws IndexOutOfBoundsException        If the given offset is out of the bounds of the buffer.
    * @see Buffer#write(byte[])
-   * @see Buffer#write(byte[], int, int)
+   * @see Buffer#write(byte[], long, long)
    */
   @Override
-  Buffer write(int offset, byte[] src, int srcOffset, int length);
+  Buffer write(long offset, byte[] src, long srcOffset, long length);
 
   /**
    * Writes a byte to the buffer at the current position.
@@ -1000,7 +1000,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param b The byte to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If there are no bytes remaining in the buffer.
-   * @see Buffer#writeByte(int, int)
+   * @see Buffer#writeByte(long, int)
    */
   @Override
   Buffer writeByte(int b);
@@ -1020,7 +1020,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeByte(int)
    */
   @Override
-  Buffer writeByte(int offset, int b);
+  Buffer writeByte(long offset, int b);
 
   /**
    * Writes an unsigned byte to the buffer at the current position.
@@ -1031,7 +1031,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param b The byte to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If there are no bytes remaining in the buffer.
-   * @see Buffer#writeUnsignedByte(int, int)
+   * @see Buffer#writeUnsignedByte(long, int)
    */
   @Override
   Buffer writeUnsignedByte(int b);
@@ -1051,7 +1051,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeUnsignedByte(int)
    */
   @Override
-  Buffer writeUnsignedByte(int offset, int b);
+  Buffer writeUnsignedByte(long offset, int b);
 
   /**
    * Writes a 16-bit character to the buffer at the current position.
@@ -1063,7 +1063,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param c The character to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If {@link Buffer#remaining()} is less than {@link Bytes#CHARACTER}.
-   * @see Buffer#writeChar(int, char)
+   * @see Buffer#writeChar(long, char)
    */
   @Override
   Buffer writeChar(char c);
@@ -1083,7 +1083,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeChar(char)
    */
   @Override
-  Buffer writeChar(int offset, char c);
+  Buffer writeChar(long offset, char c);
 
   /**
    * Writes a 16-bit signed integer to the buffer at the current position.
@@ -1095,7 +1095,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param s The short to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If {@link Buffer#remaining()} is less than {@link Bytes#SHORT}.
-   * @see Buffer#writeShort(int, short)
+   * @see Buffer#writeShort(long, short)
    */
   @Override
   Buffer writeShort(short s);
@@ -1115,7 +1115,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeShort(short)
    */
   @Override
-  Buffer writeShort(int offset, short s);
+  Buffer writeShort(long offset, short s);
 
   /**
    * Writes a 16-bit signed integer to the buffer at the current position.
@@ -1127,7 +1127,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param s The short to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If {@link Buffer#remaining()} is less than {@link Bytes#SHORT}.
-   * @see Buffer#writeUnsignedShort(int, int)
+   * @see Buffer#writeUnsignedShort(long, int)
    */
   @Override
   Buffer writeUnsignedShort(int s);
@@ -1147,7 +1147,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeUnsignedShort(int)
    */
   @Override
-  Buffer writeUnsignedShort(int offset, int s);
+  Buffer writeUnsignedShort(long offset, int s);
 
   /**
    * Writes a 32-bit signed integer to the buffer at the current position.
@@ -1159,7 +1159,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param i The integer to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If {@link Buffer#remaining()} is less than {@link Bytes#INTEGER}.
-   * @see Buffer#writeInt(int, int)
+   * @see Buffer#writeInt(long, int)
    */
   @Override
   Buffer writeInt(int i);
@@ -1179,7 +1179,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeInt(int)
    */
   @Override
-  Buffer writeInt(int offset, int i);
+  Buffer writeInt(long offset, int i);
 
   /**
    * Writes a 32-bit signed integer to the buffer at the current position.
@@ -1191,7 +1191,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param i The integer to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If {@link Buffer#remaining()} is less than {@link Bytes#INTEGER}.
-   * @see Buffer#writeUnsignedInt(int, long)
+   * @see Buffer#writeUnsignedInt(long, long)
    */
   @Override
   Buffer writeUnsignedInt(long i);
@@ -1211,7 +1211,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeUnsignedInt(long)
    */
   @Override
-  Buffer writeUnsignedInt(int offset, long i);
+  Buffer writeUnsignedInt(long offset, long i);
 
   /**
    * Writes a 64-bit signed integer to the buffer at the current position.
@@ -1223,7 +1223,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param l The long to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If {@link Buffer#remaining()} is less than {@link Bytes#LONG}.
-   * @see Buffer#writeLong(int, long)
+   * @see Buffer#writeLong(long, long)
    */
   @Override
   Buffer writeLong(long l);
@@ -1243,7 +1243,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeLong(long)
    */
   @Override
-  Buffer writeLong(int offset, long l);
+  Buffer writeLong(long offset, long l);
 
   /**
    * Writes a single-precision 32-bit floating point number to the buffer at the current position.
@@ -1255,7 +1255,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param f The float to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If {@link Buffer#remaining()} is less than {@link Bytes#FLOAT}.
-   * @see Buffer#writeFloat(int, float)
+   * @see Buffer#writeFloat(long, float)
    */
   @Override
   Buffer writeFloat(float f);
@@ -1275,7 +1275,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeFloat(float)
    */
   @Override
-  Buffer writeFloat(int offset, float f);
+  Buffer writeFloat(long offset, float f);
 
   /**
    * Writes a double-precision 64-bit floating point number to the buffer at the current position.
@@ -1287,7 +1287,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param d The double to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If {@link Buffer#remaining()} is less than {@link Bytes#DOUBLE}.
-   * @see Buffer#writeDouble(int, double)
+   * @see Buffer#writeDouble(long, double)
    */
   @Override
   Buffer writeDouble(double d);
@@ -1307,7 +1307,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeDouble(double)
    */
   @Override
-  Buffer writeDouble(int offset, double d);
+  Buffer writeDouble(long offset, double d);
 
   /**
    * Writes a 1 byte boolean to the buffer at the current position.
@@ -1319,7 +1319,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param b The boolean to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If the number of bytes exceeds the buffer's remaining bytes.
-   * @see Buffer#writeBoolean(int, boolean)
+   * @see Buffer#writeBoolean(long, boolean)
    */
   @Override
   Buffer writeBoolean(boolean b);
@@ -1339,7 +1339,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeBoolean(boolean)
    */
   @Override
-  Buffer writeBoolean(int offset, boolean b);
+  Buffer writeBoolean(long offset, boolean b);
 
   /**
    * Writes a UTF-8 string to the buffer at the current position.
@@ -1350,7 +1350,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @param s The string to write.
    * @return The written buffer.
    * @throws java.nio.BufferOverflowException If the number of bytes exceeds the buffer's remaining bytes.
-   * @see Buffer#writeUTF8(int, String)
+   * @see Buffer#writeUTF8(long, String)
    */
   @Override
   Buffer writeUTF8(String s);
@@ -1370,7 +1370,7 @@ public interface Buffer extends BytesInput<Buffer>, BufferInput<Buffer>, BytesOu
    * @see Buffer#writeUTF8(String)
    */
   @Override
-  Buffer writeUTF8(int offset, String s);
+  Buffer writeUTF8(long offset, String s);
 
   /**
    * Closes the buffer.

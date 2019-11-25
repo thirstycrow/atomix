@@ -41,12 +41,12 @@ public class DefaultBackupInput implements BackupInput {
   }
 
   @Override
-  public int position() {
+  public long position() {
     return input.position();
   }
 
   @Override
-  public int remaining() {
+  public long remaining() {
     return input.remaining();
   }
 
@@ -56,7 +56,7 @@ public class DefaultBackupInput implements BackupInput {
   }
 
   @Override
-  public BackupInput skip(int bytes) {
+  public BackupInput skip(long bytes) {
     input.skip(bytes);
     return this;
   }
@@ -74,13 +74,13 @@ public class DefaultBackupInput implements BackupInput {
   }
 
   @Override
-  public BackupInput read(Bytes bytes, int offset, int length) {
+  public BackupInput read(Bytes bytes, long offset, long length) {
     input.read(bytes, offset, length);
     return this;
   }
 
   @Override
-  public BackupInput read(byte[] bytes, int offset, int length) {
+  public BackupInput read(byte[] bytes, long offset, long length) {
     input.read(bytes, offset, length);
     return this;
   }

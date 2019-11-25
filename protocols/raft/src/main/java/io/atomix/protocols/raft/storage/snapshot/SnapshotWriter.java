@@ -76,13 +76,13 @@ public class SnapshotWriter implements BufferOutput<SnapshotWriter> {
   }
 
   @Override
-  public SnapshotWriter write(Bytes bytes, int offset, int length) {
+  public SnapshotWriter write(Bytes bytes, long offset, long length) {
     buffer.write(bytes, offset, length);
     return this;
   }
 
   @Override
-  public SnapshotWriter write(byte[] bytes, int offset, int length) {
+  public SnapshotWriter write(byte[] bytes, long offset, long length) {
     buffer.write(bytes, offset, length);
     return this;
   }

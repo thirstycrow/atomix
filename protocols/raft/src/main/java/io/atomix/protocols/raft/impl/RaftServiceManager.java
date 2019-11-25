@@ -454,10 +454,10 @@ public class RaftServiceManager implements AutoCloseable {
     try (SnapshotWriter writer = snapshot.openWriter()) {
       for (RaftServiceContext service : raft.getServices()) {
         writer.buffer().mark();
-        SnapshotWriter serviceWriter = new SnapshotWriter(writer.buffer().writeInt(0).slice(), writer.snapshot());
+        SnapshotWriter serviceWriter = new SnapshotWriter(writer.buffer().writeLong(0).slice(), writer.snapshot());
         snapshotService(serviceWriter, service);
-        int length = serviceWriter.buffer().position();
-        writer.buffer().reset().writeInt(length).skip(length);
+        long length = serviceWriter.buffer().position();
+        writer.buffer().reset().writeLong(length).skip(length);
       }
     } catch (Exception e) {
       snapshot.close();
@@ -495,15 +495,16 @@ public class RaftServiceManager implements AutoCloseable {
     logger.debug("Installing snapshot {}", snapshot);
     try (SnapshotReader reader = snapshot.openReader()) {
       while (reader.hasRemaining()) {
-        try {
-          int length = reader.readInt();
-          if (length > 0) {
+        long length = reader.readLong();
+        if (length > 0) {
+          try {
             SnapshotReader serviceReader = new SnapshotReader(reader.buffer().slice(length), reader.snapshot());
             installService(serviceReader);
+          } catch (Exception e) {
+            logger.error("Failed to read snapshot", e);
+          } finally {
             reader.skip(length);
           }
-        } catch (Exception e) {
-          logger.error("Failed to read snapshot", e);
         }
       }
     }

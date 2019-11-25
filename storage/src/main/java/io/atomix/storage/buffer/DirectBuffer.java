@@ -30,8 +30,8 @@ public class DirectBuffer extends ByteBufferBuffer {
    * Allocates a direct buffer with an initial capacity of {@code 4096} and a maximum capacity of {@link Long#MAX_VALUE}.
    *
    * @return The direct buffer.
-   * @see DirectBuffer#allocate(int)
-   * @see DirectBuffer#allocate(int, int)
+   * @see DirectBuffer#allocate(long)
+   * @see DirectBuffer#allocate(long, long)
    */
   public static DirectBuffer allocate() {
     return allocate(DEFAULT_INITIAL_CAPACITY, MAX_SIZE);
@@ -43,11 +43,11 @@ public class DirectBuffer extends ByteBufferBuffer {
    * @param initialCapacity The initial capacity of the buffer to allocate (in bytes).
    * @return The direct buffer.
    * @throws IllegalArgumentException If {@code capacity} is greater than the maximum allowed count for
-   *                                  a {@link java.nio.ByteBuffer} - {@code Integer.MAX_VALUE - 5}
+   *                                  a {@link java.nio.ByteBuffer} - {@code Long.MAX_VALUE - 5}
    * @see DirectBuffer#allocate()
-   * @see DirectBuffer#allocate(int, int)
+   * @see DirectBuffer#allocate(long, long)
    */
-  public static DirectBuffer allocate(int initialCapacity) {
+  public static DirectBuffer allocate(long initialCapacity) {
     return allocate(initialCapacity, MAX_SIZE);
   }
 
@@ -60,14 +60,14 @@ public class DirectBuffer extends ByteBufferBuffer {
    * @throws IllegalArgumentException If {@code capacity} or {@code maxCapacity} is greater than the maximum
    *                                  allowed count for a {@link java.nio.ByteBuffer} - {@code Integer.MAX_VALUE - 5}
    * @see DirectBuffer#allocate()
-   * @see DirectBuffer#allocate(int)
+   * @see DirectBuffer#allocate(long)
    */
-  public static DirectBuffer allocate(int initialCapacity, int maxCapacity) {
+  public static DirectBuffer allocate(long initialCapacity, long maxCapacity) {
     checkArgument(initialCapacity <= maxCapacity, "initial capacity cannot be greater than maximum capacity");
     return new DirectBuffer(DirectBytes.allocate((int) Math.min(Memory.Util.toPow2(initialCapacity), MAX_SIZE)), 0, initialCapacity, maxCapacity);
   }
 
-  protected DirectBuffer(DirectBytes bytes, int offset, int initialCapacity, int maxCapacity) {
+  protected DirectBuffer(DirectBytes bytes, long offset, long initialCapacity, long maxCapacity) {
     super(bytes, offset, initialCapacity, maxCapacity, null);
   }
 

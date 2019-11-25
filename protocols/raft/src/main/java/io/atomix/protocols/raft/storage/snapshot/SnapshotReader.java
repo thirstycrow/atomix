@@ -64,12 +64,12 @@ public class SnapshotReader implements BufferInput<SnapshotReader> {
   }
 
   @Override
-  public int position() {
+  public long position() {
     return buffer.position();
   }
 
   @Override
-  public int remaining() {
+  public long remaining() {
     return buffer.remaining();
   }
 
@@ -79,7 +79,7 @@ public class SnapshotReader implements BufferInput<SnapshotReader> {
   }
 
   @Override
-  public SnapshotReader skip(int bytes) {
+  public SnapshotReader skip(long bytes) {
     buffer.skip(bytes);
     return this;
   }
@@ -97,13 +97,13 @@ public class SnapshotReader implements BufferInput<SnapshotReader> {
   }
 
   @Override
-  public SnapshotReader read(Bytes bytes, int offset, int length) {
+  public SnapshotReader read(Bytes bytes, long offset, long length) {
     buffer.read(bytes, offset, length);
     return this;
   }
 
   @Override
-  public SnapshotReader read(byte[] bytes, int offset, int length) {
+  public SnapshotReader read(byte[] bytes, long offset, long length) {
     buffer.read(bytes, offset, length);
     return this;
   }

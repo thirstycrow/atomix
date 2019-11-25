@@ -57,7 +57,7 @@ public interface Bytes extends BytesInput<Bytes>, BytesOutput<Bytes>, AutoClosea
    *
    * @return The count of the bytes.
    */
-  int size();
+  long size();
 
   /**
    * Resizes the bytes.
@@ -69,7 +69,7 @@ public interface Bytes extends BytesInput<Bytes>, BytesOutput<Bytes>, AutoClosea
    * @param newSize The count to which to resize this instance.
    * @return The resized bytes.
    */
-  Bytes resize(int newSize);
+  Bytes resize(long newSize);
 
   /**
    * Returns the byte order.

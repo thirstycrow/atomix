@@ -23,12 +23,12 @@ package io.atomix.storage.buffer;
 public class UnpooledHeapAllocator extends UnpooledAllocator {
 
   @Override
-  protected int maxCapacity() {
+  protected long maxCapacity() {
     return HeapBuffer.MAX_SIZE;
   }
 
   @Override
-  public Buffer allocate(int initialCapacity, int maxCapacity) {
+  public Buffer allocate(long initialCapacity, long maxCapacity) {
     return HeapBuffer.allocate(initialCapacity, maxCapacity);
   }
 

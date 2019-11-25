@@ -29,9 +29,9 @@ public class HeapBytes extends ByteBufferBytes {
    * @param size The count of the buffer to allocate (in bytes).
    * @return The heap buffer.
    * @throws IllegalArgumentException If {@code count} is greater than the maximum allowed count for
-   *                                  an array on the Java heap - {@code Integer.MAX_VALUE - 5}
+   *                                  an array on the Java heap - {@code Long.MAX_VALUE - 5}
    */
-  public static HeapBytes allocate(int size) {
+  public static HeapBytes allocate(long size) {
     if (size > MAX_SIZE) {
       throw new IllegalArgumentException("size cannot for HeapBytes cannot be greater than " + MAX_SIZE);
     }

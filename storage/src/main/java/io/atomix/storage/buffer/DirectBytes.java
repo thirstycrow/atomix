@@ -28,7 +28,7 @@ public class DirectBytes extends ByteBufferBytes {
    * @param size The count of the buffer to allocate (in bytes).
    * @return The direct buffer.
    * @throws IllegalArgumentException If {@code count} is greater than the maximum allowed count for
-   *                                  an array on the Java heap - {@code Integer.MAX_VALUE - 5}
+   *                                  an array on the Java heap - {@code Long.MAX_VALUE - 5}
    */
   public static DirectBytes allocate(int size) {
     if (size > MAX_SIZE) {

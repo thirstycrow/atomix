@@ -419,7 +419,7 @@ abstract class AbstractAppender implements AutoCloseable {
       try (SnapshotReader reader = snapshot.openReader()) {
         // Skip to the next batch of bytes according to the snapshot chunk size and current offset.
         reader.skip(member.getNextSnapshotOffset() * MAX_BATCH_SIZE);
-        byte[] data = new byte[Math.min(MAX_BATCH_SIZE, reader.remaining())];
+        byte[] data = new byte[Math.min(MAX_BATCH_SIZE, (int) reader.remaining())];
         reader.read(data);
 
         // Create the install request, indicating whether this is the last chunk of data based on the number

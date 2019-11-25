@@ -191,7 +191,7 @@ public class SnapshotStore implements AutoCloseable {
    * Creates a memory snapshot.
    */
   private Snapshot createMemorySnapshot(SnapshotDescriptor descriptor) {
-    HeapBuffer buffer = HeapBuffer.allocate(SnapshotDescriptor.BYTES, Integer.MAX_VALUE);
+    HeapBuffer buffer = HeapBuffer.allocate(SnapshotDescriptor.BYTES, Long.MAX_VALUE);
     Snapshot snapshot = new MemorySnapshot(buffer, descriptor.copyTo(buffer), this);
     log.debug("Created memory snapshot: {}", snapshot);
     return snapshot;

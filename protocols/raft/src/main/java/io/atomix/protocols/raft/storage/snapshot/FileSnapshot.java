@@ -45,14 +45,14 @@ final class FileSnapshot extends Snapshot {
     Buffer buffer = FileBuffer.allocate(file.file(), SnapshotDescriptor.BYTES);
     descriptor.copyTo(buffer);
 
-    int length = buffer.position(SnapshotDescriptor.BYTES).readInt();
+    long length = buffer.position(SnapshotDescriptor.BYTES).readLong();
     return openWriter(new SnapshotWriter(buffer.skip(length).mark(), this), descriptor);
   }
 
   @Override
   protected void closeWriter(SnapshotWriter writer) {
-    int length = writer.buffer.position() - (SnapshotDescriptor.BYTES + Integer.BYTES);
-    writer.buffer.writeInt(SnapshotDescriptor.BYTES, length).flush();
+    long length = writer.buffer.position() - (SnapshotDescriptor.BYTES + Long.BYTES);
+    writer.buffer.writeLong(SnapshotDescriptor.BYTES, length).flush();
     super.closeWriter(writer);
   }
 
@@ -61,8 +61,8 @@ final class FileSnapshot extends Snapshot {
     checkState(file.file().exists(), "missing snapshot file: %s", file.file());
     Buffer buffer = FileBuffer.allocate(file.file(), SnapshotDescriptor.BYTES);
     SnapshotDescriptor descriptor = new SnapshotDescriptor(buffer);
-    int length = buffer.position(SnapshotDescriptor.BYTES).readInt();
-    return openReader(new SnapshotReader(buffer.mark().limit(SnapshotDescriptor.BYTES + Integer.BYTES + length), this), descriptor);
+    long length = buffer.position(SnapshotDescriptor.BYTES).readLong();
+    return openReader(new SnapshotReader(buffer.mark().limit(SnapshotDescriptor.BYTES + Long.BYTES + length), this), descriptor);
   }
 
   @Override

@@ -36,17 +36,17 @@ import static io.atomix.storage.buffer.Bytes.SHORT;
  * @author <a href="http://github.com/kuujo">Jordan Halterman</a>
  */
 public abstract class AbstractBuffer implements Buffer {
-  static final int DEFAULT_INITIAL_CAPACITY = 4096;
-  static final int MAX_SIZE = Integer.MAX_VALUE - 5;
+  static final long DEFAULT_INITIAL_CAPACITY = 4096;
+  static final long MAX_SIZE = Long.MAX_VALUE - 5;
 
   protected final Bytes bytes;
-  private int offset;
-  private int initialCapacity;
-  private int capacity;
-  private int maxCapacity;
-  private int position;
-  private int limit = -1;
-  private int mark = -1;
+  private long offset;
+  private long initialCapacity;
+  private long capacity;
+  private long maxCapacity;
+  private long position;
+  private long limit = -1;
+  private long mark = -1;
   private final AtomicInteger references = new AtomicInteger();
   protected final ReferenceManager<Buffer> referenceManager;
   private SwappedBuffer swap;
@@ -55,7 +55,7 @@ public abstract class AbstractBuffer implements Buffer {
     this(bytes, 0, 0, 0, referenceManager);
   }
 
-  protected AbstractBuffer(Bytes bytes, int offset, int initialCapacity, int maxCapacity, ReferenceManager<Buffer> referenceManager) {
+  protected AbstractBuffer(Bytes bytes, long offset, long initialCapacity, long maxCapacity, ReferenceManager<Buffer> referenceManager) {
     if (bytes == null) {
       throw new NullPointerException("bytes cannot be null");
     }
@@ -75,7 +75,7 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Resets the buffer's internal offset and capacity.
    */
-  protected AbstractBuffer reset(int offset, int capacity, int maxCapacity) {
+  protected AbstractBuffer reset(long offset, long capacity, long maxCapacity) {
     this.offset = offset;
     this.capacity = 0;
     this.initialCapacity = capacity;
@@ -167,12 +167,12 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Compacts the given bytes.
    */
-  protected abstract void compact(int from, int to, int length);
+  protected abstract void compact(long from, long to, long length);
 
   @Override
   public Buffer slice() {
-    int maxCapacity = this.maxCapacity - position;
-    int capacity = Math.min(Math.min(initialCapacity, maxCapacity), bytes.size() - offset(position));
+    long maxCapacity = this.maxCapacity - position;
+    long capacity = Math.min(Math.min(initialCapacity, maxCapacity), bytes.size() - offset(position));
     if (limit != -1) {
       capacity = maxCapacity = limit - position;
     }
@@ -180,31 +180,32 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer slice(int length) {
+  public Buffer slice(long length) {
     checkSlice(position, length);
     return new SlicedBuffer(this, bytes, offset(position), length, length);
   }
 
   @Override
-  public Buffer slice(int offset, int length) {
+  public Buffer slice(long offset, long length) {
     checkSlice(offset, length);
     return new SlicedBuffer(this, bytes, offset(offset), length, length);
   }
 
   @Override
-  public int offset() {
+  public long offset() {
     return offset;
   }
 
   @Override
-  public int capacity() {
+  public long capacity() {
     return capacity;
   }
 
   /**
    * Updates the buffer capacity.
    */
-  public Buffer capacity(int capacity) {
+  @Override
+  public Buffer capacity(long capacity) {
     if (capacity > maxCapacity) {
       throw new IllegalArgumentException("capacity cannot be greater than maximum capacity");
     } else if (capacity < this.capacity) {
@@ -212,7 +213,9 @@ public abstract class AbstractBuffer implements Buffer {
     } else if (capacity != this.capacity) {
       // It's possible that the bytes could already meet the requirements of the capacity.
       if (offset(capacity) > bytes.size()) {
-        bytes.resize((int) Math.min(Memory.Util.toPow2(offset(capacity)), Integer.MAX_VALUE));
+        long newSize = Math.min(offset(capacity), MAX_SIZE);
+        long oldSize = bytes.size();
+        bytes.resize(newSize);
       }
       this.capacity = capacity;
     }
@@ -220,24 +223,24 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public int maxCapacity() {
+  public long maxCapacity() {
     return maxCapacity;
   }
 
   @Override
-  public int position() {
+  public long position() {
     return position;
   }
 
   @Override
-  public Buffer position(int position) {
+  public Buffer position(long position) {
     if (limit != -1 && position > limit) {
       throw new IllegalArgumentException("position cannot be greater than limit");
     } else if (limit == -1 && position > maxCapacity) {
       throw new IllegalArgumentException("position cannot be greater than capacity");
     }
     if (position > capacity) {
-      capacity((int) Math.min(maxCapacity, Memory.Util.toPow2(position)));
+      capacity(Math.min(maxCapacity, Memory.Util.toPow2(position)));
     }
     this.position = position;
     return this;
@@ -246,17 +249,17 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Returns the real offset of the given relative offset.
    */
-  private int offset(int offset) {
+  private long offset(long offset) {
     return this.offset + offset;
   }
 
   @Override
-  public int limit() {
+  public long limit() {
     return limit;
   }
 
   @Override
-  public Buffer limit(int limit) {
+  public Buffer limit(long limit) {
     if (limit > maxCapacity) {
       throw new IllegalArgumentException("limit cannot be greater than buffer capacity");
     }
@@ -271,7 +274,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public int remaining() {
+  public long remaining() {
     return (limit == -1 ? maxCapacity : limit) - position;
   }
 
@@ -311,7 +314,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer skip(int length) {
+  public Buffer skip(long length) {
     if (length > remaining()) {
       throw new IndexOutOfBoundsException("length cannot be greater than remaining bytes in the buffer");
     }
@@ -330,7 +333,7 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Checks that the offset is within the bounds of the buffer.
    */
-  protected void checkOffset(int offset) {
+  protected void checkOffset(long offset) {
     if (offset(offset) < this.offset) {
       throw new IndexOutOfBoundsException();
     } else if (limit == -1) {
@@ -347,7 +350,7 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Checks bounds for a slice.
    */
-  protected int checkSlice(int offset, int length) {
+  protected long checkSlice(long offset, long length) {
     checkOffset(offset);
     if (limit == -1) {
       if (offset + length > capacity) {
@@ -368,9 +371,9 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Checks bounds for a read for the given length.
    */
-  protected int checkRead(int length) {
+  protected long checkRead(long length) {
     checkRead(position, length);
-    int previousPosition = this.position;
+    long previousPosition = this.position;
     this.position = previousPosition + length;
     return offset(previousPosition);
   }
@@ -378,7 +381,7 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Checks bounds for a read.
    */
-  protected int checkRead(int offset, int length) {
+  protected long checkRead(long offset, long length) {
     checkOffset(offset);
     if (limit == -1) {
       if (offset + length > capacity) {
@@ -403,9 +406,9 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Checks bounds for a write of the given length.
    */
-  protected int checkWrite(int length) {
+  protected long checkWrite(long length) {
     checkWrite(position, length);
-    int previousPosition = this.position;
+    long previousPosition = this.position;
     this.position = previousPosition + length;
     return offset(previousPosition);
   }
@@ -413,7 +416,7 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Checks bounds for a write.
    */
-  protected int checkWrite(int offset, int length) {
+  protected long checkWrite(long offset, long length) {
     checkOffset(offset);
     if (limit == -1) {
       if (offset + length > capacity) {
@@ -434,10 +437,15 @@ public abstract class AbstractBuffer implements Buffer {
   /**
    * Calculates the next capacity that meets the given minimum capacity.
    */
-  private int calculateCapacity(int minimumCapacity) {
-    int newCapacity = Math.min(Math.max(capacity, 2), minimumCapacity);
+  private long calculateCapacity(long minimumCapacity) {
+    long newCapacity = Math.min(Math.max(capacity, 2), minimumCapacity);
+    long gb = 1 << 30;
     while (newCapacity < Math.min(minimumCapacity, maxCapacity)) {
-      newCapacity <<= 1;
+      if (newCapacity > gb) {
+        newCapacity += gb;
+      } else {
+        newCapacity <<= 1;
+      }
     }
     return Math.min(newCapacity, maxCapacity);
   }
@@ -449,14 +457,14 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer zero(int offset) {
+  public Buffer zero(long offset) {
     checkOffset(offset);
     bytes.zero(offset(offset));
     return this;
   }
 
   @Override
-  public Buffer zero(int offset, int length) {
+  public Buffer zero(long offset, long length) {
     checkOffset(offset);
     bytes.zero(offset(offset), length);
     return this;
@@ -464,7 +472,7 @@ public abstract class AbstractBuffer implements Buffer {
 
   @Override
   public Buffer read(Buffer buffer) {
-    int length = Math.min(buffer.remaining(), remaining());
+    long length = Math.min(buffer.remaining(), remaining());
     read(buffer.bytes(), buffer.offset() + buffer.position(), length);
     buffer.position(buffer.position() + length);
     return this;
@@ -477,13 +485,13 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer read(Bytes bytes, int offset, int length) {
+  public Buffer read(Bytes bytes, long offset, long length) {
     this.bytes.read(checkRead(length), bytes, offset, length);
     return this;
   }
 
   @Override
-  public Buffer read(int srcOffset, Bytes bytes, int dstOffset, int length) {
+  public Buffer read(long srcOffset, Bytes bytes, long dstOffset, long length) {
     this.bytes.read(checkRead(srcOffset, length), bytes, dstOffset, length);
     return this;
   }
@@ -495,13 +503,13 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer read(byte[] bytes, int offset, int length) {
+  public Buffer read(byte[] bytes, long offset, long length) {
     this.bytes.read(checkRead(length), bytes, offset, length);
     return this;
   }
 
   @Override
-  public Buffer read(int srcOffset, byte[] bytes, int dstOffset, int length) {
+  public Buffer read(long srcOffset, byte[] bytes, long dstOffset, long length) {
     this.bytes.read(checkRead(srcOffset, length), bytes, dstOffset, length);
     return this;
   }
@@ -512,7 +520,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public int readByte(int offset) {
+  public int readByte(long offset) {
     return bytes.readByte(checkRead(offset, BYTE));
   }
 
@@ -522,7 +530,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public int readUnsignedByte(int offset) {
+  public int readUnsignedByte(long offset) {
     return bytes.readUnsignedByte(checkRead(offset, BYTE));
   }
 
@@ -532,7 +540,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public char readChar(int offset) {
+  public char readChar(long offset) {
     return bytes.readChar(checkRead(offset, Bytes.CHARACTER));
   }
 
@@ -542,7 +550,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public short readShort(int offset) {
+  public short readShort(long offset) {
     return bytes.readShort(checkRead(offset, SHORT));
   }
 
@@ -552,7 +560,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public int readUnsignedShort(int offset) {
+  public int readUnsignedShort(long offset) {
     return bytes.readUnsignedShort(checkRead(offset, SHORT));
   }
 
@@ -562,7 +570,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public int readMedium(int offset) {
+  public int readMedium(long offset) {
     return bytes.readMedium(checkRead(offset, 3));
   }
 
@@ -572,7 +580,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public int readUnsignedMedium(int offset) {
+  public int readUnsignedMedium(long offset) {
     return bytes.readUnsignedMedium(checkRead(offset, 3));
   }
 
@@ -582,7 +590,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public int readInt(int offset) {
+  public int readInt(long offset) {
     return bytes.readInt(checkRead(offset, Bytes.INTEGER));
   }
 
@@ -592,7 +600,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public long readUnsignedInt(int offset) {
+  public long readUnsignedInt(long offset) {
     return bytes.readUnsignedInt(checkRead(offset, Bytes.INTEGER));
   }
 
@@ -602,7 +610,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public long readLong(int offset) {
+  public long readLong(long offset) {
     return bytes.readLong(checkRead(offset, Bytes.LONG));
   }
 
@@ -612,7 +620,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public float readFloat(int offset) {
+  public float readFloat(long offset) {
     return bytes.readFloat(checkRead(offset, Bytes.FLOAT));
   }
 
@@ -622,7 +630,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public double readDouble(int offset) {
+  public double readDouble(long offset) {
     return bytes.readDouble(checkRead(offset, Bytes.DOUBLE));
   }
 
@@ -632,7 +640,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public boolean readBoolean(int offset) {
+  public boolean readBoolean(long offset) {
     return bytes.readBoolean(checkRead(offset, BYTE));
   }
 
@@ -650,7 +658,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public String readString(int offset, Charset charset) {
+  public String readString(long offset, Charset charset) {
     if (readBoolean(offset)) {
       byte[] bytes = new byte[readUnsignedShort(offset + BOOLEAN)];
       read(offset + BOOLEAN + SHORT, bytes, 0, bytes.length);
@@ -665,7 +673,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public String readString(int offset) {
+  public String readString(long offset) {
     return readString(offset, Charset.defaultCharset());
   }
 
@@ -675,13 +683,13 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public String readUTF8(int offset) {
+  public String readUTF8(long offset) {
     return readString(offset, StandardCharsets.UTF_8);
   }
 
   @Override
   public Buffer write(Buffer buffer) {
-    int length = Math.min(buffer.remaining(), remaining());
+    long length = Math.min(buffer.remaining(), remaining());
     write(buffer.bytes(), buffer.offset() + buffer.position(), length);
     buffer.position(buffer.position() + length);
     return this;
@@ -694,13 +702,13 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer write(Bytes bytes, int offset, int length) {
+  public Buffer write(Bytes bytes, long offset, long length) {
     this.bytes.write(checkWrite(length), bytes, offset, length);
     return this;
   }
 
   @Override
-  public Buffer write(int offset, Bytes bytes, int srcOffset, int length) {
+  public Buffer write(long offset, Bytes bytes, long srcOffset, long length) {
     this.bytes.write(checkWrite(offset, length), bytes, srcOffset, length);
     return this;
   }
@@ -712,13 +720,13 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer write(byte[] bytes, int offset, int length) {
+  public Buffer write(byte[] bytes, long offset, long length) {
     this.bytes.write(checkWrite(length), bytes, offset, length);
     return this;
   }
 
   @Override
-  public Buffer write(int offset, byte[] bytes, int srcOffset, int length) {
+  public Buffer write(long offset, byte[] bytes, long srcOffset, long length) {
     this.bytes.write(checkWrite(offset, length), bytes, srcOffset, length);
     return this;
   }
@@ -730,7 +738,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeByte(int offset, int b) {
+  public Buffer writeByte(long offset, int b) {
     bytes.writeByte(checkWrite(offset, BYTE), b);
     return this;
   }
@@ -742,7 +750,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeUnsignedByte(int offset, int b) {
+  public Buffer writeUnsignedByte(long offset, int b) {
     bytes.writeUnsignedByte(checkWrite(offset, BYTE), b);
     return this;
   }
@@ -754,7 +762,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeChar(int offset, char c) {
+  public Buffer writeChar(long offset, char c) {
     bytes.writeChar(checkWrite(offset, Bytes.CHARACTER), c);
     return this;
   }
@@ -766,7 +774,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeShort(int offset, short s) {
+  public Buffer writeShort(long offset, short s) {
     bytes.writeShort(checkWrite(offset, SHORT), s);
     return this;
   }
@@ -778,7 +786,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeUnsignedShort(int offset, int s) {
+  public Buffer writeUnsignedShort(long offset, int s) {
     bytes.writeUnsignedShort(checkWrite(offset, SHORT), s);
     return this;
   }
@@ -790,7 +798,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeMedium(int offset, int m) {
+  public Buffer writeMedium(long offset, int m) {
     bytes.writeMedium(checkWrite(offset, 3), m);
     return this;
   }
@@ -802,7 +810,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeUnsignedMedium(int offset, int m) {
+  public Buffer writeUnsignedMedium(long offset, int m) {
     bytes.writeUnsignedMedium(checkWrite(offset, 3), m);
     return this;
   }
@@ -814,7 +822,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeInt(int offset, int i) {
+  public Buffer writeInt(long offset, int i) {
     bytes.writeInt(checkWrite(offset, Bytes.INTEGER), i);
     return this;
   }
@@ -826,7 +834,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeUnsignedInt(int offset, long i) {
+  public Buffer writeUnsignedInt(long offset, long i) {
     bytes.writeUnsignedInt(checkWrite(offset, Bytes.INTEGER), i);
     return this;
   }
@@ -838,7 +846,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeLong(int offset, long l) {
+  public Buffer writeLong(long offset, long l) {
     bytes.writeLong(checkWrite(offset, Bytes.LONG), l);
     return this;
   }
@@ -850,7 +858,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeFloat(int offset, float f) {
+  public Buffer writeFloat(long offset, float f) {
     bytes.writeFloat(checkWrite(offset, Bytes.FLOAT), f);
     return this;
   }
@@ -862,7 +870,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeDouble(int offset, double d) {
+  public Buffer writeDouble(long offset, double d) {
     bytes.writeDouble(checkWrite(offset, Bytes.DOUBLE), d);
     return this;
   }
@@ -874,7 +882,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeBoolean(int offset, boolean b) {
+  public Buffer writeBoolean(long offset, boolean b) {
     bytes.writeBoolean(checkWrite(offset, BYTE), b);
     return this;
   }
@@ -894,7 +902,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeString(int offset, String s, Charset charset) {
+  public Buffer writeString(long offset, String s, Charset charset) {
     if (s == null) {
       return writeBoolean(checkWrite(offset, BOOLEAN), Boolean.FALSE);
     } else {
@@ -913,7 +921,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeString(int offset, String s) {
+  public Buffer writeString(long offset, String s) {
     return writeString(offset, s, Charset.defaultCharset());
   }
 
@@ -923,7 +931,7 @@ public abstract class AbstractBuffer implements Buffer {
   }
 
   @Override
-  public Buffer writeUTF8(int offset, String s) {
+  public Buffer writeUTF8(long offset, String s) {
     return writeString(offset, s, StandardCharsets.UTF_8);
   }
 

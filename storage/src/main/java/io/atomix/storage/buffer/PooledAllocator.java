@@ -42,12 +42,12 @@ public abstract class PooledAllocator implements BufferAllocator {
   }
 
   @Override
-  public Buffer allocate(int capacity) {
+  public Buffer allocate(long capacity) {
     return allocate(capacity, maxCapacity());
   }
 
   @Override
-  public Buffer allocate(int initialCapacity, int maxCapacity) {
+  public Buffer allocate(long initialCapacity, long maxCapacity) {
     return pool.acquire().reset(0, initialCapacity, maxCapacity).clear();
   }
 
