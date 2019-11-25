@@ -158,7 +158,7 @@ public class SnapshotStore implements AutoCloseable {
         .withIndex(index)
         .withTimestamp(timestamp.unixTimestamp())
         .build();
-    return newSnapshot(descriptor, StorageLevel.MEMORY);
+    return newSnapshot(descriptor, storage.storageLevel());
   }
 
   /**
